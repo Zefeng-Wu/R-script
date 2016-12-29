@@ -1,0 +1,7 @@
+df1 <- data.frame(name = c("feat1", "feat2", "feat3"), start = c(2,1000, 1050), end = c(600, 800, 1345), strand = c(-1, -1,1), col = c("blue", "grey", "red"))
+df2 <- data.frame(name = c("feat1", "feat2", "feat3"), start = c(50, 800, 1200), end = c(900, 1100, 1322), strand = c(-1, 1, 1), col = c("blue", "grey", "red"))
+dna_seg2 <- dna_seg(df2)
+df3 <- data.frame(name = c("feat1", "feat2", "feat3"), start = c(1899,2108, 2803), end = c(2034, 2732, 3620), strand = c(-1, -1, 1), col = rep("blue", 3))
+dna_seg3 <- dna_seg(df3)
+dna_segs <- list(dna_seg1, dna_seg2, dna_seg3)
+plot_gene_map(dna_segs = dna_segs)
