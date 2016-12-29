@@ -1,0 +1,5 @@
+family	up_down	number	percentage	sum
+TCA	up	20	20	100
+TCA	down	80	80	100
+p53	up	100	10	1000
+p53	down	900	90	1000
