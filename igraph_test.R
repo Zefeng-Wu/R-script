@@ -21,6 +21,10 @@ E(g)[from(3)]
 ## 入读
 E(g)[to(3)]
 
+## 网络直径
+farthest.nodes(g)
+
+
 #给graph添加属性（包括节点属性和边属性）
 
 g$layout<-layout_in_circle   # plot layout
@@ -32,6 +36,11 @@ E(t1)$width <- 3             # edge width
 
 #添加一条边
 g<-add_edges(g,c(1,5),color="red")
+
+
+#对网络进行划分
+dg <- decompose.graph(g) # return list; for example, dg[[1]] is the first subgraph
+clusters<-clusters(g)
 
 
 3.#produce randow grpah
@@ -56,7 +65,7 @@ betweesness
 g<-erdos.renyi.game(100,0.4,directed=T)#生成ER随机图表
 m<-gsize(g)#获取边数
 n<-vcount(g)#获取顶点数
-l<-mean_distance(g)##计算平均路径长度
+l<-mean_distance(g)##计算联络平均路径长度
 c<-transitivity(g)#计算聚类系数
 degree<-degree(g,mode="all",normalized=T)#mode=in点入度;out=点出度;total点度中心度，三者统称绝对点中心度,相对点中心度=绝对点中心度/最大度数
 table(degree)#度统计
@@ -106,6 +115,10 @@ closeness(g,vids=which(V(g)$label=="c"))
 #说明网络越能够放在一块。
 graph.density(g.zn)  
 
+##layout
+layout_with_dh #太慢,不建议用
+layout.davidson.harel #太慢,不建议用
 
-
+#保持度分布不变,随机网络
+rewire(g,with=keeping_degseq())
 

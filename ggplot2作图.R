@@ -113,7 +113,7 @@ pie = pie + coord_polar("y")
 pie = pie + xlab('') + ylab('') + labs(fill="Types")
 pie<-pie+theme(axis.ticks = element_blank()) #	去掉左上角小胡子
 #加比例
-#pie+geom_text(aes(y = Percentage/2+c(0, cumsum(Percentage)[-length(Percentage)]), label = percent), size=3)
+#pie+geom_text(aes(y = Percentage/2+c(0, cumsum(Percentage)[-length(Percentage)]),x=sum(Percentage)/20, label = percent), size=3)
 #自动颜色填充
 #pie + scale_fill_manual(values = colours,labels = labels)
 
@@ -174,3 +174,145 @@ df  <- data.frame(chr, pos, cov)
 require(ggplot2)
 p <- ggplot(data = df, aes(x=pos, y=cov)) + geom_area(aes(fill=chr))
 p + facet_wrap(~ chr, ncol=1)
+
+
+
+###短型数据
+test_data <-
+  data.frame(
+    var0 = 100 + c(0, cumsum(runif(49, -20, 20))),
+    var1 = 150 + c(0, cumsum(runif(49, -10, 10))),
+    date = seq(as.Date("2002-01-01"), by="1 month", length.out=100)
+  )
+
+ ggplot(test_data, aes(date)) + 
++     geom_line(aes(y = var0, colour = "var0")) + 
++     geom_line(aes(y = var1, colour = "var1"))
+
++labs(colour = "Class") #修改legend title :+labs(fill = "TSS region")
+
+
+
+
+#For loop
+plot<-list()
+for (m in colnames(data)[1:4]){
+  plot[[m]]<-ggplot(data,aes_string(x="Species",y=m))+geom_boxplot()
+}
+library(gridExtra)
+do.call(grid.arrange,plot)
+
+library("gridExtra")
+#grid.arrange(plot1, plot2, nrow=1, ncol=2)
+
+#或者#
+library(ggpubr) 
+ggarrange(p1,p2,p3,p4,p5)
+
+
+### dotplot with mean bar
+
+ggplot(iris, aes(x=Species, y=Sepal.Width)) +  
+     geom_dotplot(binaxis = 'y',stackdir = 'center',dotsize = 0.5) +
+     geom_crossbar(data=iris %>% group_by(Species) %>% summarise_all(mean), aes(ymin = Sepal.Width, ymax = Sepal.Width), size=0.5,col="red", width = .5)
+
+
+##加箭头
++annotate("segment", x=0.5, xend=0.5, y=100, yend=0, color="red", size=2, arrow=arrow()) 
+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+
+
+
+##ggplot 柱状图加入垂直线
+data<-read.table("/data1/SRA/Arbidopsis_chip/leaf/sra/3mapping/unique_sam/sorted_bam/dedup_sorted_bam/stat_scripts/9re_analysis_pesudo_add1_for_all_genes_prediction/5.4.4_out_data/1000_low_expressed_coding_genes.txt",stringsAsFactors = FALSE)
+ggplot(data,aes(x=V1))+geom_histogram(bins=50)+
+                       xlim(0.5,0.9)+xlab("PCC")+
+                       ylab("Frequency")+
+                       theme(text = element_text(size = 20))+
+                       annotate("segment", x=0.5, xend=0.5, y=50, yend=0, color="red", size=2, arrow=arrow())+
+                       annotate("segment", x=0.8, xend=0.8, y=50, yend=0, color="black", size=2, arrow=arrow())
+
+
+### ggplot 分组加不分组
+ggplot(df, aes(x = class, y = x, fill = class)) + geom_boxplot() + geom_boxplot(aes(x = "all", fill = NULL))
+
+###
+library(ggsignif)
+ggplot(df,aes(x=class,y=degree,fill=class))+geom_boxplot()+
+        geom_signif(comparisons = list(c("Imprinted_genes","All genes"),c("All genes","rice_orthologous"),c("Imprinted_genes","rice_orthologous")),
+                    test="wilcox.test", test.args=list(alternative="greater"),step_increase = 0.05,tip_length = 0.01)+
+        theme_bw(base_size = 20)+
+        scale_x_discrete(labels=c("All genes","Rice orthologs","Imprinted genes"))+
+        scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9"))+
+        theme(legend.position="none")+ylab("Degree")
+
+
+
+#简单散点图
+scaleFUN <- function(x) sprintf("%.1f", x)
+g = ggplot(data.frame(predicted=predicted_ten_fold, measured=measured_ten_fold), aes(x=predicted, y = measured_ten_fold))
+g = g + geom_point(alpha=0.3,colour="#666666")
+g = g + theme(text = element_text(size=20),plot.margin = ggplot2::margin(1, 1, 1, 1, "cm"))+xlab("Predicted expression (log2)")+ylab("Measured expression (log2)")
+g = g + geom_smooth(method = "lm", colour = "black")
+g = g + annotate("text",x=-1.5,y=16,label= paste("Pearson's r = ", round(mean(cross_validations_cor),2), " (p-value < 2.2e-16)","\n RMSE = ",round(rmse(predicted_ten_fold,measured_ten_fold),2)),hjust = 0,size=6)+ylim(0,NA)
+g= g+scale_y_continuous(labels=scaleFUN)
+
+
+
+## 2D density
+scaleFUN <- function(x) sprintf("%.1f", x) # 纵小数点位数一样
+
+manipulate(
+    	ggplot(data, aes(x = predicted,y=measured)) + 
+	geom_point() +
+        stat_density_2d(geom = "raster", aes(fill = ..density..), 
+			contour = F, 
+                        h = c(x_bandwidth, y_bandwidth),
+                        n = grid_points) +
+	geom_smooth(method=lm,linetype=2,colour="black",se=F)+
+	theme_bw()+
+	theme(text = element_text(size=20),
+		plot.margin = ggplot2::margin(1, 1, 1, 1, "cm"),
+		legend.position=c(0.85,0.8), #注意调位置
+		legend.text=element_text(size=10), 
+		legend.title=element_text(size=10))+
+	xlab("Predicted expression (log2)")+
+	ylab("Measured expression (log2)")+
+	annotate("text",x=0,y=17, #注意调位置
+		label= paste("Pearson's r = 0.8"," (p-value < 2.2e-16)"),hjust = 0,vjust=-0.8,size=6)+
+	scale_y_continuous(labels=scaleFUN)+
+        scale_fill_distiller(palette = "Spectral", direction = -1),
+    			     x_bandwidth = slider(0.1, 20, 1, step = 0.1),
+    			     y_bandwidth = slider(0.1, 20, 1, step = 0.1),
+    			     grid_points = slider(1, 100, 16)
+)
+
+#加上阴影
+m<-read.table("/home/wuzefeng/MyResearch/networks/2network_prediction/4network_analysis_result/2high_confidence_imp_result/imp_fanmod/motif.txt",sep="\t",header = TRUE)
+m$num<-seq(1,nrow(m))
+m$nz<-m$Z.Score/sqrt(sum(m$Z.Score^2))
+ggplot(m,aes(x=num,y=nz,group=1))+ylim(-0.8,0.8)+
+  geom_vline(xintercept = 0)+
+  theme_minimal(base_size = 20)+
+  scale_x_discrete(limits=seq(1,28),labels=seq(1,28))+xlab("")+
+  ylab("Normalized Z-score")+
+  geom_rect(aes(xmin=m$num-0.5,
+                xmax=m$num+0.5,
+                ymin=-Inf,
+                ymax=Inf),
+                fill = rep(c("gray70","white"),14))+
+  geom_line(color="steelblue")+
+  geom_point(size=6, shape=20,color="steelblue")+
+  geom_hline(yintercept = 0)
+
+## ggplo2 bubble plot
+library(ggplot2)                           
+
+days <- c("Mon","Tues","Wed","Thurs","Fri")
+slots <- c("Coffee/Breakfast","Lunch","Happy Hour","Dinner")
+df <- expand.grid(days, slots)
+df$value <- c(1,1,1,1,2,1,1,NA,NA,1,4,4,7,4,1,5,6,14,5,1)    
+#Plot the Data
+g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = "green") + theme_bw() + xlab("") + ylab("")
+g + scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
+

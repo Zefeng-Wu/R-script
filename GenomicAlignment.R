@@ -1,0 +1,6 @@
+library(GenomicAlignments)
+coverage(BamFile("/data1/SRA/Arbidopsis_chip/leaf/sra/3mapping/unique_sam/sorted_bam/dedup_sorted_bam/7good_bam/H3K4me3.bam"))
+class(x1)
+all_cvg <- bindAsGRanges(x1)
+tileGenone()
+binnedAverage()

@@ -14,3 +14,7 @@ library(rtracklayer)
 er_ranges <-  rtracklayer::import("Desktop//test.bed", format = "bed")
 autoplot(er_ranges,layout="karyogram",aes(color=er_ranges$name,fill=er_ranges$name))
 #autoplot(er_ranges,layout="karyogram",aes(fill = er_ranges$name))#按指定列不同颜色填充
+
+
+#可以画覆盖度
+ggplot(gr) + stat_aggregate(aes(y = value), geom = "boxplot", window = 60)

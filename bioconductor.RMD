@@ -1,0 +1,24 @@
+1.网络构建:
+CoRegNet: Reconstruction and integrated analysis of Co-Regulatory Networks : 共调控网络Build Regulatory Network from ChIP-chip/ChIP-seq and Expression Data
+minet : mutaul rank 
+GeneNet：图论的高斯方法，贝叶斯
+GGMselect 
+
+2.染色体高级结构绘图
+Sushi
+
+3.NGS工作流程:
+systemPipeR
+
+3.ggplot2画图：
+ggsci:颜色符合期刊
+
+4.tss plot
+metagene
+enrichheatmap
+
+
+5.trackViewer (2017)
+# 可显示snp在染色体上的位置
+
+6.karyoploteR (2017染色体)

@@ -15,6 +15,8 @@ countByOverlaps(query_range,,subject_range)	      #返回每个query有几次重
 
 #3临近操作
 nearest(query_range,subject_range)    #找与query_range最临近的subject range,返回subject index
+genes[nearest(gr, genes)] # 找与每个cpsisland最近的基因
+
 precede(query_range,subject_range) #上游
 follow(query_range,subject_range)  #下游
 distanceToNearest(query_range,subject_range)  #每个query与最近的subject的index以及它们之间的距离
@@ -39,12 +41,35 @@ lapply(grl,function(x) order(width(x)))  #对GrangesList对象每个元素(GRang
 ###reduce();flank();coverage()和findOverlaps直接可以操作GrangesList对象
 reduce(grl)
 
+
+
 ######GenomicFeatures
 transcripsByOverlaps(tr,genes(tr)) #提取和基因想重叠的转录本 
-flank(grange,width=3000) #默认往上游取3000bp
+flank(grange,width=3000,ignore.strand=FALSE) #默认往上游取3000bp
+punion(promoters(mygr,upstream=1000), mygr) # 取上游以及基因区
+punion(flank(imp_gr,width = 1000),imp_gr)
+#或
+extendRegions(genes,extend.start = 1000,extend.end=0) #不能考虑正负链
+
 gaps(Granges) #默认考虑了正负链,产生许多冗余信息,一般情况下不考虑正负链了
 subsetByOverlaps(query_range,subject_range,ignore.strand=TRUE)
- 
+
+### GenomicFeatures 排序 
+sort(introns_with_longest_transcripts,by=~names)
+
+#### 从数据框获取数据转为grange
+repeat_gr<-makeGRangesFromDataFrame(data,keep.extra.columns = TRUE,ignore.strand = TRUE,seqnames.field = "V1",start.field = "V2",end.field = "V3")
+
+### 如果grange有重叠,则需要去除重叠的
+y<-reduce(cpg_gr,with.revmap=TRUE)
+mcols(y):#可以查看重叠部分
+
+#计算覆盖度
+snps = GRanges("chr1", IRanges(c(1000, 1200, 2000), width=1))
+cvg <- coverage(snps)
+r <- runmean(cvg, 500)
+plot(as.numeric(r[[1]]), type="l")
+ggbio::autoplot(r)
 
 
-
+####

@@ -37,6 +37,7 @@ header<-eval(parse(text=args[1]))
 table()
 a<-c(1,2,3,4,5,3,5)
 table(a)
+#注意table会改变原文件顺序
 
 #R 语言读取大文件
 
@@ -167,3 +168,93 @@ strSort <-function(x) sapply(lapply(strsplit(x,NULL),sort),paste,collapse="")
 df_deduplicate<-df[!duplicated(df[,"col_id"]),]
 
 #################两个数据框根据某列索引时,不能用%in%,会导致位置错误,需要用merge数据框
+
+##################读取列数不同的文件
+x <- file("/home/wuzefeng/MyResearch/order_staticstics/ara.meta")
+mylist <- strsplit(readLines(x), "\t")
+close(x)
+
+cor(tt,use="pairwise.complete.obs") #删除配对的NA
+
+#数据框除以列和
+ mapply("/", df, colSums(df))
+
+##回归去除异常值
+data<-data.frame(X=medium,Y=colSums(rc_new))
+res <- resid(mod <- lm(Y ~ X, data = data))
+res.qt <- quantile(res, probs = c(0.05,0.95))
+want <- which(res >= res.qt[1] & res <= res.qt[2])
+plot(data, type = "n")
+points(data[-want,], col = "black", pch = 21, bg = "black", cex = 0.8)
+points(data[want,], col = "red", pch = 21, bg = "red", cex = 0.8)
+abline(mod, col = "blue", lwd = 2)
+
+
+### R合并多个dataframe
+res <- Reduce(function(a,b){ ans <- merge(a,b,by.x = c("X1","X2"),all.x=T)}, list(gene_cor.df,tf_cor.df,gp_cor.df,domin_int,data_biogrid)) # wrong merge
+
+###字符串匹配
+X <- c("mama.log", "papa.log", "mimo.png", "mentor.log")
+X[grepl("^m.*\\.log", X)]
+
+
+##滑动窗口
+library(TTR)
+data<-data.frame(a=c(1,2,3,4,5,6,7,8,9,10),b=c(0.1,0.2,0.3,0.2,0.3,0.6,0.7,0.5,0.3,0.4))
+data$sma <- SMA(data$b, 3) #步长为三
+
+## 两列数据变为矩阵
+as.data.frame.matrix(data) # data含有两列数据
+
+## 根据前两列(uniqe)取第三列平均值
+#
+x1	x2	value1
+x1	x2	value2
+###
+x1	x2	mean(value1+value2)/2
+
+
+### dplyr 练习
+
+library(dplyr)
+gene_domain_intact<-as.data.frame(gene_domain_intact %>% group_by(X1, X2) %>% summarise_all(funs(mean)))
+select(data,starts_with("letter in colnames"))
+
+##交换列:调整列顺序，把Species列放到最前面  
+select(iris, Species, everything())  
+
+## 多列取最大值,并且保留原始列信息
+data %>% select(one_of(c("Num", "pcc","BIC")))
+data %>% group_by(Num) %>% filter(pcc == max(pcc))  # 如果想保存多列信息
+
+
+### tidyr (宽变长) #搞清楚那些是变量,哪些是数字,变量的话要合并成一列.
+ff<-df %>% gather(new_variable,new_value_variable,-c(Num,pcc,BIC),convert=TRUE) %>% arrange(Num)  # Num,pcc,BIC不做为分类变量,故要排除,convert:格式转换;所有变量不需要加引号
+
+## 长变宽
+ff %>% spread(key="new_variable",value = "new_value_varibiable",convert = TRUE)
+
+## 按多变量进行summary,分组统计
+data %>% group_by_(.dots=c("Gene","Method"))%>% summarise_all(mean)
+data %>% group_by(Gene,Method)%>% summarise_all(mean)
+data %>% group_by(variable1) %>% summarise_all(max)
+
+dd %>% group_by(f) %>% summarise_at(colnames(dd[2:3]),max) # 只按某些列进行统计,结果不会保留多列
+dd %>% group_by(f) %>% slice(which.min(colmmn_name))
+
+## face_wrap +jitter + cross_bar
+ggplot(data, aes(x=Method, y=Pearson)) +  
+    geom_jitter(width = 0.2) +facet_wrap(~Gene,nrow=1)+scale_y_continuous(name="PCC", limits=c(0.6, 0.9))+geom_crossbar(data=data %>% group_by_(.dots=c("Gene","Method")) %>% summarise_all(mean), aes(ymin = Pearson, ymax = Pearson), size=0.5,col="red", width = .5)+theme(text = element_text(size=20),axis.text.x=element_text(angle=45, hjust=1))+xlab("")
+
+## group之后添加一列
+
+
+## 三列变矩阵
+library(reshape2)
+acast(df, a~b, value.var="c")
+
+
+### 按列分组统计,每组按行(带条件)求和
+colnames <- unique(stringr::str_split_fixed(colnames(d2_histone),pattern = "_",n = 2)[,1])
+d2_histone_condition_sum<- sapply(colnames, function(xx) apply(d2_histone[,grep(xx, names(d2_histone)), drop=FALSE],1,function(x)sum(x[x>=max(x)*t])/length(x[x>=max(x)*t])))
+

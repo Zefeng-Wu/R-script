@@ -3,9 +3,9 @@
 library(Gviz)                                         #导入模块
 #######################################################################
 data(cpgIslands)                                      #导入CpG岛数据
-atr <- AnnotationTrack(genome="mm9", chromosome="chr1",cpgIslands, name="CpG")        #添加注释track
+atr <- AnnotationTrack(cpgIslands, name="CpG")        #添加注释track
 #######################################################################
-gtr <- GenomeAxisTrack(genome="mm9", chromosome="chr1")                              #添加基因组(线条)track
+gtr <- GenomeAxisTrack()                              #添加基因组(线条)track
 #######################################################################
 itr <- IdeogramTrack(genome="mm9", chromosome="chr1") #添加染色体图形track
 #######################################################################

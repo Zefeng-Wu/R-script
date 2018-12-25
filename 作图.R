@@ -234,3 +234,44 @@ p = ggplot(dt, aes(x = "", y = V2, fill = V1)) +
   theme(legend.title = element_blank(), legend.position = "right") + 
   scale_fill_discrete(breaks = dt$V1, labels = myLabel)      
 
+
+### upset 方法对集合(多个list)去交集并且可视化; 也可以对数据框直接各列取交集
+#example1
+
+listInput <- list(one = c(1, 2, 3, 5, 7, 8, 11, 12, 13),
+		 two = c(1, 2, 4, 5, 10), 
+		 three = c(1, 5, 6, 7, 8, 9, 10, 12, 13)
+		 )
+upset(fromList(listInput), order.by = "freq")
+
+#example2
+
+upset(movies, #dataframe(0,1,short)
+      nsets = 6, 			#取数目最多的六列作为六个集合
+      number.angles = 30, 		#柱状图上面数字的倾斜角度
+      point.size = 3.5,			#circle的大小
+      line.size = 2, 			#连接circle的线的粗细
+      mainbar.y.label = "Genre Intersections", #纵轴的标签label
+      sets.x.label = "Movies Per Genre", 	#横轴
+      text.scale = c(1.3, 1.3, 1, 1, 2, 0.75)) #c(intersection size title, intersection size tick labels, set size title, set size tick labels, set names, numbers above bars)
+
+# example3:从数据框选择特定几个集合upset,并按特定顺序展示交集情况
+upset(movies, sets = c("Action", "Adventure", "Comedy", "Drama", "Mystery", "Thriller", "Romance", "War", "Western"),
+      mb.ratio = c(0.55, 0.45),
+      order.by = "freq") #通过每类总数
+
+
+upset(movies, sets = c("Action", "Adventure", "Comedy", "Drama", "Mystery", 
+    "Thriller", "Romance", "War", "Western"), mb.ratio = c(0.55, 0.45), order.by = "degree") # 交集的集合数目排序
+
+upset(movies, sets = c("Action", "Adventure", "Comedy", "Drama", "Mystery", 
+    "Thriller", "Romance", "War", "Western"), mb.ratio = c(0.55, 0.45), order.by = c("degree",  # 同时按两种情况排序
+    "freq"))
+
+upset(movies, sets = c("Action", "Adventure", "Comedy", "Drama", "Mystery", 
+    "Thriller", "Romance", "War", "Western"), mb.ratio = c(0.55, 0.45), order.by = "freq", 
+    keep.order = TRUE) #集合名字按顺序排列
+
+upset(movies, empty.intersections = "on", order.by = "freq") #空交集打开
+
+
