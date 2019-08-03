@@ -1,4 +1,4 @@
-library(Biotrings)
+library(Biostrings)
 library(rtracklayer)
 
 fa<-readBStringSet("/home/wuzefeng/MyResearch/genome.db/TAIR/dna/Arabidopsis_thaliana.TAIR10.31.dna.toplevel.fa")
