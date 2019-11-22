@@ -18,3 +18,44 @@ autoplot(er_ranges,layout="karyogram",aes(color=er_ranges$name,fill=er_ranges$na
 
 #可以画覆盖度
 ggplot(gr) + stat_aggregate(aes(y = value), geom = "boxplot", window = 60)
+
+
+
+
+
+
+##
+library(GenomicRanges)
+library(ggbio)
+
+## make chromosome gr
+gr <- GRanges(seqnames = c("chr1", "chr2", "chr3"),IRanges(start = c(0,0,0), end=c(400,500,700)))
+seqlengths(gr) <- c(400, 500, 700)
+
+## make plot gr
+set.seed(1)
+N <- 100
+plot_gr <- GRanges(seqnames = sample(c("chr1", "chr2", "chr3"), size = N, replace = TRUE),
+              IRanges(start = sample(1:300, size = N, replace = TRUE), width = sample(70:75,size = N, replace = TRUE)),
+              strand = sample(c("+", "-", "*"),size = N,replace = TRUE),
+              value = rnorm(N, 10, 3), 
+              score = rnorm(N, 100, 30),
+              sample = sample(c("Normal", "Tumor"),
+              size = N, replace = TRUE), pair = sample(letters,size = N, replace = TRUE))
+seqlengths(plot_gr) <- c(400, 500, 700)
+values(plot_gr)$to.gr <- plot_gr[sample(1:length(plot_gr), size = length(plot_gr))]
+idx <- sample(1:length(plot_gr), size = 50)
+plot_gr <- plot_gr[idx]
+
+###### plot 
+ggplot()+ layout_circle(gr, geom = "ideo", fill = aes(fill=seqnames), radius = 7, trackWidth = 3)+
+  layout_circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 5,radius = 6)+
+  layout_circle(plot_gr, geom = "bar", radius = 10, trackWidth = 4,fill="steelblue",aes(y = score))+
+  layout_circle(plot_gr, geom = "point", color = "red", radius = 14,trackWidth = 3, grid = TRUE, aes(y = score))+
+  layout_circle(plot_gr, geom = "link", linked.to = "to.gr", radius = 6, trackWidth= 1)
+## or
+ggbio()+ circle(gr, geom = "ideo", fill = aes(fill=seqnames), radius = 7, trackWidth = 3)+
+  circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 5,radius = 6)+
+  circle(plot_gr, geom = "bar", radius = 10, trackWidth = 4,fill="steelblue",aes(y = score))+
+  circle(plot_gr, geom = "point", color = "red", radius = 14,trackWidth = 3, grid = TRUE, aes(y = score,size=score))+
+  circle(plot_gr, geom = "link", linked.to = "to.gr", radius = 6, trackWidth= 1)
