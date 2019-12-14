@@ -9,7 +9,7 @@ these scripts are based on bioconductor project
     updateR()
 ## methylation level in genome-wide
 <p align="center">
-<a href="https://github.com/Zefeng-Wu/R-script/Figures/methylation.png">
+<a href="https://github.com/Zefeng-Wu/R-script/blob/master/Figures/methylation.png">
 <img src="Figures/methylation.png" height="460px" width="680px">
 </a>
 </p>
