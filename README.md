@@ -7,3 +7,9 @@ these scripts are based on bioconductor project
     install.packages("installr")
     require(installr)
     updateR()
+## methylation level in genome-wide
+<p align="center">
+<a href="https://github.com/Zefeng-Wu/R-script/Figures/methylation.png">
+<img src="Figures/methylation.png" height="460px" width="680px">
+</a>
+</p>
