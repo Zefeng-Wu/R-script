@@ -1,11 +1,21 @@
 #pdf(paste("aa","density.pdf",sep="."),width=5+5*0.3,height=0.5*(5+2))
 
+## plot curve function
+plot_curve<-function(x1,x2,score=2,offset=0,posneg=1){
+  vert_x= (x1 + x2) / 2
+  a = score/((vert_x - x1) * (vert_x - x2))
+  curve(offset+posneg * a * (x - x1) * (x - x2),from=x1, to=x2, add=TRUE,col="blue",lty=2)
+}
+
 ## load Grange data with score column
-library(rtracklayer)
-meth<-import.gff3("/home/wuzefeng/MyResearch/methylation_database/tair/ara.meth.gff3")
-meth<-meth[meth$source=="chh"]
-strand(meth)<-ifelse(meth$score>=0,"+","-")
-meth$score<-abs(meth$score)
+set.seed(100)
+meth<-GRanges(seqnames = paste("Chr",sample(seq(1,8),size = 10000,replace = TRUE),sep = ""),
+              ranges = IRanges(start = sample(seq(1,1000000),10000),
+                               width = sample(seq(1,1000),10000,replace = TRUE)),
+              strand = sample(c("+","-"),10000,replace = TRUE))
+meth<-sort(meth)
+seqlevels(meth)<-sort(seqlevels(meth))
+meth$score<-abs(rnorm(100))
 split_meth<-split(meth,seqnames(meth))
 
 ### define some variables
@@ -46,14 +56,16 @@ for (chr in names(split_meth)){
   tiles$score_neg[is.na(tiles$score_neg)]<-0
   
   ## plot scores in both pos and neg strand 
-  barplot(tiles$score_pos,space=0,xlim=c(0,max_chr_length/window_size),ylim=c(-1,1),col="#66C2A5",border="#66C2A5");
-  barplot(-as.numeric(tiles$score_neg),space=0,xlim=c(0,max_chr_length/window_size),add=TRUE,col="#FC8D62",border="#FC8D62");
+  barplot(tiles$score_pos,space=0,xlim=c(0,max_chr_length/window_size),ylim=c(-1,1),col="#66C2A5",border="#66C2A5")
+  barplot(-as.numeric(tiles$score_neg),space=0,xlim=c(0,max_chr_length/window_size),add=TRUE,col="#FC8D62",border="#FC8D62")
+  # add curve
+  plot_curve(x1 = 100,x2 = 200,score = 1,offset = 0,posneg = -1)
   par(las=2)
   mtext(chr,side=4,line=1,adj=0.0)
   i=i+1
   if(i==ceiling(chrom_number/1.5)){
    par(las=0)
-   mtext("Median of read density (log2)",side=2,line=3,cex=1)
+   mtext("Mean methylation level",side=2,line=3,cex=1)
 }
 }
 
