@@ -1,0 +1,202 @@
+---
+title: "common_plot"
+author: "wuzefeng"
+date: "2/2/2020"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# 1.Chromosome plot
+
+```{r,fig.width=10, fig.height=2}
+library(ggplot2)
+df<-data.frame(chr=c("Chr1","Chr1","Chr2","Chr2"),start=c(200,300,150,460),end=c(270,350,200,500),type=c("cds","intron","cds","intron"))
+df$chr_len <-c(400,400,500,500)
+df$values <-c(0.1,0.2,0.3,0.2)
+
+###    chr start end   type chr_len
+### 1 Chr1   200 270    cds     400
+### 2 Chr1   300 350 intron     400
+### 3 Chr2   150 200    cds     500
+### 4 Chr2   460 500 intron     500
+
+p<-ggplot(df,aes(x=(start+end)/(2*1000),
+                 y=df$values,
+                 width=(end-start)/1000,fill=type))+
+  geom_bar(stat="identity")+
+  scale_y_continuous(limits=c(0,max(df$values)),expand=c(0,0))+
+  scale_x_continuous(breaks=c(c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8)),
+                     expand=c(0,0))+
+  #scale_fill_manual(values=c("Land" = "#FF0000", "Var" ="#0000FF","Both"="grey"))+
+  theme_set(theme_minimal())+ 
+  theme(panel.grid.minor=element_blank())+
+  theme(panel.grid.major=element_blank())+ 
+  theme(axis.text.y = element_blank(),axis.ticks.y = element_blank())+
+  theme(plot.background=element_rect(fill="transparent",colour="white"))+
+  xlab("Position (Kb)")+
+  ylab("")+
+  facet_grid(chr~.,scales = 'free',space = "free_y")+
+  geom_rect(mapping = aes(xmin=0,xmax=chr_len/1000,ymin=0,ymax=max(df$values)),fill="white",color="black",alpha=0,size=0.3)
+p 
+```
+
+## 2. chromosome by
+```{r}
+library(GenomicRanges)
+library(ggbio)
+
+## make chromosome gr
+gr <- GRanges(seqnames = c("chr1", "chr2", "chr3"),IRanges(start = c(0,0,0), end=c(400,500,700)))
+seqlengths(gr) <- c(400, 500, 700)
+
+## make plot gr
+set.seed(1)
+N <- 100
+plot_gr <- GRanges(seqnames = sample(c("chr1", "chr2", "chr3"), size = N, replace = TRUE),IRanges(start = sample(1:300, size = N, replace = TRUE), width = sample(70:75,size = N, replace = TRUE)),
+              strand = sample(c("+", "-", "*"),size = N,replace = TRUE),
+              value = rnorm(N, 10, 3), 
+              score = rnorm(N, 100, 30),
+              sample = sample(c("Normal", "Tumor"),
+              size = N, replace = TRUE), pair = sample(letters,size = N, replace = TRUE))
+seqlengths(plot_gr) <- c(400, 500, 700)
+values(plot_gr)$to.gr <- plot_gr[sample(1:length(plot_gr), size = length(plot_gr))]
+idx <- sample(1:length(plot_gr), size = 50)
+plot_gr <- plot_gr[idx]
+
+###### plot 
+ggplot()+ layout_circle(gr, geom = "ideo", fill = aes(fill=seqnames), radius = 7, trackWidth = 3)+
+  layout_circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 5,radius = 6)+
+  layout_circle(plot_gr, geom = "bar", radius = 10, trackWidth = 4,fill="steelblue",aes(y = score))+
+  layout_circle(plot_gr, geom = "point", color = "red", radius = 14,trackWidth = 3, grid = TRUE, aes(y = score))+
+  layout_circle(plot_gr, geom = "link", linked.to = "to.gr", radius = 6, trackWidth= 1)
+## or
+ggbio()+ circle(gr, geom = "ideo", fill = aes(fill=seqnames), radius = 7, trackWidth = 3)+
+  circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 5,radius = 6)+
+  circle(plot_gr, geom = "bar", radius = 10, trackWidth = 4,fill="steelblue",aes(y = score))+
+  circle(plot_gr, geom = "point", color = "red", radius = 14,trackWidth = 3, grid = TRUE, aes(y = score,size=score))+
+  circle(plot_gr, geom = "link", linked.to = "to.gr", radius = 6, trackWidth= 1)
+```
+## 3. Volcano Plot 
+```{r,include =TRUE,warning=FALSE}
+library(ggplot2)
+library(ggpubr)
+library(ggthemes)
+library(readxl)
+
+diff_exp <- read_xlsx("/media/wuzefeng/新加卷/rmarkdown/ka120vs.Col.results.xlsx",
+                      col_types = c("guess","numeric","numeric","numeric","numeric","numeric","logical"))
+diff_exp <-diff_exp[!is.na(diff_exp$padj),]
+diff_exp$logP <- -log10(diff_exp$padj)
+diff_exp <- diff_exp[diff_exp$logP<50,]
+
+## up-regulated and downregulated 
+diff_exp$Group <- "not-significant"
+diff_exp$Group[which((diff_exp$padj<0.05)&(diff_exp$log2FoldChange>1))] <-"up-regulated"
+diff_exp$Group[which((diff_exp$padj<0.05)&(diff_exp$log2FoldChange< -1))] <-"down-regulated"
+
+## label
+diff_exp$Label = ""
+diff_exp <-diff_exp[order(diff_exp$padj),]
+up.genes <- head(diff_exp$sRNA[which(diff_exp$Group=="up-regulated")],10)
+down.genes <- head(diff_exp$sRNA[which(diff_exp$Group=="down-regulated")],10)
+deg.top10.genes <- c(as.character(up.genes),as.character(down.genes))
+diff_exp$Label[match(deg.top10.genes,diff_exp$sRNA)] <-deg.top10.genes
+
+##plot
+ggscatter(diff_exp,x="log2FoldChange",y="logP",
+          color="Group",
+          palette = c("#2f5688","#BBBBBB",'#CC0000'),
+          size = 2,label = diff_exp$Label,font.label = 8,repel = T,
+          xlab = "log2FoldChange",ylab = "-log10(Adjust P-value)")+
+  theme_base()+
+  geom_hline(yintercept = 1.3,linetype="dashed")+
+  geom_vline(xintercept = c(-1,1),linetype="dashed")+
+  ggtitle("ka120_vs_col")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## 4 reads distribution
+
+```{r}
+require(GenomicRanges)
+
+plot_curve<-function(x1,x2,score=2,offset=0,posneg=1){
+  vert_x= (x1 + x2) / 2
+  a = score/((vert_x - x1) * (vert_x - x2))
+  curve(offset+posneg * a * (x - x1) * (x - x2),from=x1, to=x2, add=TRUE,col="blue",lty=2)
+}
+
+## load Grange data with score column
+set.seed(100)
+meth<-GRanges(seqnames = paste("Chr",sample(seq(1,8),size = 10000,replace = TRUE),sep = ""),
+              ranges = IRanges(start = sample(seq(1,1000000),10000),
+                               width = sample(seq(1,1000),10000,replace = TRUE)),
+              strand = sample(c("+","-"),10000,replace = TRUE))
+meth<-sort(meth)
+seqlevels(meth)<-sort(seqlevels(meth))
+meth$score<-abs(rnorm(100))
+split_meth<-split(meth,seqnames(meth))
+
+### define some variables
+max_chr_length <- max(end(meth))
+chrom_number <- length(split_meth)
+window_size <- 1000
+
+### set the layout for ploting 
+par(mfrow=c(chrom_number+2,1),oma=c(1,1,1,5),mar=c(1,1,1,5))
+plot(1:10,1:10,col="white",bty="n",yaxt="n",xaxt="n",xlab="",ylab="")
+mtext(paste("Methylation level in Chromosomes"),side=3,line=-1,cex=1.5)
+
+head(split_meth)
+
+### for loop chromosomes
+i=1
+for (chr in names(split_meth)){
+  par(las=0,plt=c(0.1,0.9,0.1,0.9))
+  temp_chr_gr<-split_meth[[chr]]
+  
+  
+  temp_chr_gr_pos<-split(temp_chr_gr,strand(temp_chr_gr))$`+`
+  temp_chr_gr_neg<-split(temp_chr_gr,strand(temp_chr_gr))$`-`
+  
+  ## make bin window (1000bp)
+  xmax<-max(end(temp_chr_gr))
+  names(xmax)<-chr
+  ## make windows for each chromsomes
+  tiles <- unlist(tileGenome(xmax, tilewidth = window_size))
+  ## window average score
+  hits_pos <- findOverlaps(tiles, temp_chr_gr_pos)
+  hits_neg <- findOverlaps(tiles, temp_chr_gr_neg)
+  agg_pos <- aggregate(temp_chr_gr_pos, hits_pos, score=mean(score))
+  agg_neg <- aggregate(temp_chr_gr_neg, hits_neg, score=mean(score))
+  
+  tiles$score_pos[countQueryHits(hits_pos) > 0L] <- agg_pos$score
+  tiles$score_pos[is.na(tiles$score_pos)]<-0
+  tiles$score_neg[countQueryHits(hits_neg) > 0L] <- agg_neg$score
+  tiles$score_neg[is.na(tiles$score_neg)]<-0
+  
+  ## plot scores in both pos and neg strand 
+  barplot(tiles$score_pos,space=0,xlim=c(0,max_chr_length/window_size),ylim=c(-1,1),col="#66C2A5",border="#66C2A5")
+  barplot(-as.numeric(tiles$score_neg),space=0,xlim=c(0,max_chr_length/window_size),add=TRUE,col="#FC8D62",border="#FC8D62")
+  # add curve
+  plot_curve(x1 = 100,x2 = 200,score = 1,offset = 0,posneg = -1)
+  par(las=2)
+  mtext(chr,side=4,line=1,adj=0.0)
+  i=i+1
+  if(i==ceiling(chrom_number/1.5)){
+   par(las=0)
+   mtext("Mean methylation level",side=2,line=3,cex=1)
+}
+}
+
+###legend plot ###
+par(plt=c(0.1,0.9,0.7,0.9),las=1)
+plot(seq(0,max_chr_length/window_size,length=10),rep(1,10),col="white",bty="n",yaxt="n",xaxt="n",ylab="",xlab="")
+axis(side=1,at=seq(0,ceiling(max_chr_length/window_size),length=8),labels=round(seq(0,ceiling(max_chr_length/window_size),length=8)/1000,1))
+mtext("chromosome position (Mb)",side=1,line=2.5)
+```
