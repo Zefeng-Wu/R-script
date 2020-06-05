@@ -316,3 +316,23 @@ df$value <- c(1,1,1,1,2,1,1,NA,NA,1,4,4,7,4,1,5,6,14,5,1)
 g <- ggplot(df, aes(Var1, Var2)) + geom_point(aes(size = value), colour = "green") + theme_bw() + xlab("") + ylab("")
 g + scale_size_continuous(range=c(10,30)) + geom_text(aes(label = value))
 
+## ggplot box with volin plot
+library(ggplot2)
+library(ggsignif)
+library(EnvStats)
+library(ggsci)
+trainning_set$class<-factor(trainning_set$class,levels = c("pos","neg"))
+p<-ggplot(trainning_set,aes(x=class,y=weight,col=class))+
+  geom_violin(trim = FALSE,aes(fill=class),alpha=0.5,col="white")+
+  geom_boxplot(width=0.1)+
+  scale_fill_aaas()+
+  scale_color_aaas()+
+  geom_signif(comparisons = list(c("pos","neg")),
+              test="wilcox.test", test.args=list(alternative="greater"),
+              step_increase = 0.05,tip_length = 0.01)+
+  theme_bw(base_size = 20)+
+  scale_x_discrete(labels=c("Positive","Negative"))+
+  theme(legend.position="none",axis.title.x=element_blank(),
+        plot.title = element_text(hjust = 0.5,size=20,face = "bold"))+ # title posistion
+  ylab("Semantic similarity (Resnik)")+
+  stat_n_text()
