@@ -55,6 +55,35 @@ p <- p+geom_segment(aes(x=2, y=.65, xend=2, yend=1.1))
 p <- p+geom_segment(aes(x=1, y=1.1, xend=2, yend=1.1))
 p <- p + annotate("text", x=1.5, y=1.06, label="*")
 
+
+##
+require(ggplot2)
+require(ggsignif)
+require(ggsci)
+
+Normal <- c(0.83, 0.79, 0.69, 0.69,0.70)
+Cancer <- c(0.56, 0.56, 0.64, 0.52,0.65)
+Para   <- c(0.6,0.7,0.5,0.5,0.6)
+
+d<-data.frame(data = c(Normal,Cancer,Para),class=rep(c("Normal","Cancer","Para"),5))
+d$class <- factor(d$class, levels=c("Normal", "Cancer","Para"))
+
+ggplot(d,aes(x=class,y=data,fill=class))+
+  geom_boxplot()+
+  geom_jitter()+
+  geom_signif(comparisons = list(c("Normal","Cancer"),
+                                 c("Cancer","Para"),
+                                 c("Normal","Para")),
+              test="wilcox.test",
+              test.args=list(alternative="greater"),
+              step_increase = 0.05,tip_length = 0.01)+
+  theme_bw()+
+  scale_fill_npg()
+
+
+
+
+
 #多个变量做箱线图
 a <- data.frame(group = "a", value = rnorm(10))
 b <- data.frame(group = "b", value = rnorm(100))
