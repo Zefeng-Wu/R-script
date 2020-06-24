@@ -225,7 +225,10 @@ select(iris, Species, everything())
 
 ## 多列取最大值,并且保留原始列信息
 data %>% select(one_of(c("Num", "pcc","BIC")))
-data %>% group_by(Num) %>% filter(pcc == max(pcc))  # 如果想保存多列信息
+data %>% group_by(Num) %>% filter(pcc == max(pcc))  # 如果想保存多列信息,但会有节
+=data %>% group_by(Num) %>% slice(which.max(pcc)) # 无节
+=data %>% group_by(Num) %>% summarise(max(pcc)) # 有节
+         
 
 
 ### tidyr (宽变长) #搞清楚那些是变量,哪些是数字,变量的话要合并成一列.
