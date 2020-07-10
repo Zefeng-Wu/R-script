@@ -15,7 +15,7 @@ stopCluster(cl)
 library(parallel)
 cl<-makeCluster(detectCores()-1)
 
-clusterExport(cl,"custom.function")
+clusterExport(cl,varlist= c("custom.function","other")
 aa <- parRapply(cl,dataframe, function(x) custom.function(x[1],x[2],x[3]))
 
 
