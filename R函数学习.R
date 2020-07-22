@@ -261,3 +261,10 @@ acast(df, a~b, value.var="c")
 colnames <- unique(stringr::str_split_fixed(colnames(d2_histone),pattern = "_",n = 2)[,1])
 d2_histone_condition_sum<- sapply(colnames, function(xx) apply(d2_histone[,grep(xx, names(d2_histone)), drop=FALSE],1,function(x)sum(x[x>=max(x)*t])/length(x[x>=max(x)*t])))
 
+## list 变为两列数据匡
+input <- list(A = letters[1:3], B = letters[3:4], C = NULL, D = character(0))
+input2 <- lapply(input, as.data.frame, stringsAsFactors = FALSE)
+DF <- bind_rows(input2, .id = "Name")                                             
+                                              
+                                                               
+                                                               
