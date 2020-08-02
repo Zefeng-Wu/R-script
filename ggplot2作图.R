@@ -80,7 +80,11 @@ ggplot(d,aes(x=class,y=data,fill=class))+
   theme_bw()+
   scale_fill_npg()
 
-
+### barplot +error +sig
+ggbarplot(ToothGrowth, x = "dose", y = "len", 
+          add = c("mean_se", "jitter"),
+          color = "supp", palette = "jco",
+          position = position_dodge(0.8))
 
 
 
