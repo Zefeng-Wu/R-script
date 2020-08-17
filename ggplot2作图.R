@@ -369,3 +369,11 @@ p<-ggplot(trainning_set,aes(x=class,y=weight,col=class))+
         plot.title = element_text(hjust = 0.5,size=20,face = "bold"))+ # title posistion
   ylab("Semantic similarity (Resnik)")+
   stat_n_text()
+
+
+## ggplot  boxplot with jitter ans se
+
+ ggbarplot(ToothGrowth, x = "dose", y = "len", 
+          add = c("mean_se", "jitter"),
+          color = "supp",  palette = "jco",
+          position = position_dodge(0.8),size=1.5)
