@@ -1,0 +1,11 @@
+Installing R packages in macOS Mojave: Error in if (nzchar(SHLIB_LIBADD))
+
+
+    find ~ -name Makeconf
+    /home/xilab/miniconda3/pkgs/r-base-3.6.1-hce969dd_0/lib/R/etc/Makeconf
+    /home/xilab/miniconda3/pkgs/r-base-3.6.1-h8900bf8_2/lib/R/etc/Makeconf
+    /home/xilab/miniconda3/envs/python2.7/lib/R/etc/Makeconf
+    /home/xilab/miniconda3/lib/R/etc/Makeconf
+    
+    mv /home/xilab/miniconda3/lib/R/etc/Makeconf /home/xilab/miniconda3/lib/R/etc/Makeconf.backup
+    cp /home/xilab/miniconda3/pkgs/r-base-3.6.1-hce969dd_0/lib/R/etc/Makeconf /home/xilab/miniconda3/lib/R/etc/Makeconf   
