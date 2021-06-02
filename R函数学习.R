@@ -266,5 +266,8 @@ input <- list(A = letters[1:3], B = letters[3:4], C = NULL, D = character(0))
 input2 <- lapply(input, as.data.frame, stringsAsFactors = FALSE)
 DF <- bind_rows(input2, .id = "Name")                                             
                                               
-                                                               
+## aggregate 分组统计
+dd <- iris
+aggregate(dd$Sepal.Length,by=list(dd$Species),mean)
+aggregate(Sepal.Length ~ Species,dd,mean)
                                                                
