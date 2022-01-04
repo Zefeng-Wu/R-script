@@ -14,3 +14,6 @@ these scripts are based on bioconductor project
 <img src="Figures/methylation.png" height="460px" width="680px">
 </a>
 </p>
+
+## 3. tissue specific genes identification
+    TissueEnrich
