@@ -13,8 +13,20 @@ p <- p + facet_grid(seqnames ~., scales="free")
 p <- p + scale_y_continuous(expand=c(0,0))
 p <- p + theme(strip.text.y=element_text(angle=360))
 
+## method 2
+library(ggplot2)
+library(GenomicRanges)
+gr<-GRanges(seqname=rep(c("chr1","chr2","chr3","chr4"),10),range=IRanges(start=sample(seq(1:100),40),width=1),strand=sample(c("+","-"),40,replace=TRUE))
+seqlengths(gr)<-c(100,120,150,110)
+gr$cov = sample(seq(1:100),length(gr))
+df<-as.data.frame(gr)
 
-
+p <- ggplot(df, aes(x=start, y=cov))
+p <- p + geom_bar(aes(x=start, y=cov,fill=strand),stat = "identity")
+p <- p + facet_grid(seqnames ~.,space = "free_x")
+#p <- p + theme_classic()
+p <- p + scale_y_continuous(expand=c(0,0))
+p <- p + theme(strip.text.y=element_text(angle=360)) 
 
 ##average gene plot (https://rpubs.com/achitsaz/124552)
 
