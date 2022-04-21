@@ -28,6 +28,40 @@ p <- p + facet_grid(seqnames ~.,space = "free_x")
 p <- p + scale_y_continuous(expand=c(0,0))
 p <- p + theme(strip.text.y=element_text(angle=360)) 
 
+
+## methods 3 heatmap
+dt <- data.table(
+chromosome = c(rep(1, 100), 
+     rep(2, 100), 
+     rep(3, 80)),
+mb_from = c(seq(1, 1000, by=10),
+      seq(1, 1000, by=10),
+      seq(1, 800, by=10)),
+mb_to = c(seq(10, 1000, by=10),
+    seq(10, 1000, by=10),
+    seq(10, 800, by=10)),
+score = c(sample(1:10, 100, replace = T),
+       sample(1:10, 100, replace = T),
+       sample(1:10, 80, replace = T))
+)
+
+
+library(dplyr)
+library(plotly)
+library(RColorBrewer)
+
+dat <- apply(dt,
+      1,
+      function(x) data.table(chromosome = x["chromosome"], mb = x["mb_from"]:x["mb_to"], score = x["score"])
+) %>%
+  rbindlist()
+
+plot_ly(dat, x = ~chromosome, y = ~mb, z = ~score, type = "heatmap",
+        colors = "RdYlBu", reversescale = T) %>%
+  layout(yaxis = list(range = c(1000, 0)))
+
+
+
 ##average gene plot (https://rpubs.com/achitsaz/124552)
 
 
